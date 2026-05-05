@@ -1,6 +1,30 @@
-# WebClient AI Workspace - Advanced Agentic RAG System
+# WebClient AI Workspace — Advanced Agentic RAG System
 
-WebClient AI Workspace is a sophisticated AI-driven chat platform designed for enterprise-level data analysis, bug tracking (Mantis DB integration), and intelligent knowledge retrieval (Document RAG). The system leverages Agentic RAG, Ollama, LangChain, and LangGraph to deliver high-precision, context-aware responses.
+An enterprise-grade AI chat platform for intelligent document retrieval, bug tracking analysis, and context-aware knowledge synthesis. Built on a fully local, privacy-first stack with no external AI API dependencies.
+
+---
+
+## Key Features
+
+- **Agentic RAG Pipeline** — multi-stage retrieval with intent analysis, query expansion (HyDE), hybrid search, and semantic re-ranking
+- **Document Intelligence** — query PDFs and internal documents with source citations and image-aware retrieval
+- **Bug Tracker Integration** — natural language interface over Mantis DB; AI generates and executes SQL in real-time
+- **Local LLM via Ollama** — runs entirely on-premises, keeping all data within your infrastructure
+- **Thought Process Transparency** — real-time streaming of reasoning steps alongside answers via SSE
+- **Multi-user Sessions** — per-user chat history with session management and role-based access
+- **Resource-Aware Execution** — dynamic model swapping to run within 16 GB VRAM without OOM errors
+- **Production-Ready** — containerized with Docker, orchestrated via Kubernetes, automated via GitLab CI/CD
+
+---
+
+## Use Cases
+
+| Scenario | How the system helps |
+|---|---|
+| Internal document Q&A | Employees query project specs, manuals, or reports in natural language |
+| Bug tracker analysis | Ask "What are the top open critical bugs in Project X?" — AI queries Mantis DB directly |
+| Cross-project knowledge | Retrieve related content across documents and sessions via graph-based relationships |
+| Constrained hardware | Run a full RAG stack on a single workstation GPU without cloud dependencies |
 
 ---
 
@@ -8,24 +32,24 @@ WebClient AI Workspace is a sophisticated AI-driven chat platform designed for e
 
 ![System Architecture](diagram/diagram.png)
 
-The system is built on a modular architecture that separates the frontend interface from the complex AI orchestration logic, ensuring scalability and robust performance.
+The system is built on a modular architecture that separates the frontend interface from the AI orchestration logic, ensuring scalability and robust performance.
 
-### 1. Technology Stack
-*   **Frontend:** React 18, Vite, TailwindCSS, and Zustand for state management.
-*   **Backend / API Gateway:** Node.js with Express.js, providing a high-performance bridge between the client and AI services.
-*   **AI Orchestration:** 
-    *   **LangChain:** Manages prompts, LLM abstractions, and chat history.
-    *   **LangGraph:** Orchestrates complex workflows through state machines, managing the "Thought Process" and agent behavior.
-    *   **LlamaIndex:** Utilized for advanced document indexing and re-ranking.
-*   **Data Persistence:**
-    *   **PostgreSQL (with pgvector):** Handles semantic vector search and hybrid retrieval for documents and graph nodes.
-    *   **MySQL:** Directly interfaces with the Mantis Bug Tracker system for real-time issue analysis.
+### Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 18, Vite, TailwindCSS, Zustand |
+| **Backend / API Gateway** | Node.js, Express.js |
+| **AI Orchestration** | LangChain, LangGraph, LlamaIndex |
+| **AI Runtime** | Ollama (local LLM serving) |
+| **Vector & Relational DB** | PostgreSQL + pgvector |
+| **Bug Tracker DB** | MySQL (Mantis Bug Tracker) |
 
 ---
 
 ## Database Schema (Entity-Relationship)
 
-The system utilizes a dual-layer database approach: a **Relational/Vector Layer** for chat and document management, and a **Unified Content Layer** for advanced RAG relationships.
+The system uses a dual-layer database approach: a **Relational/Vector Layer** for chat and document management, and a **Unified Content Layer** for advanced RAG graph relationships.
 
 ```mermaid
 erDiagram
@@ -109,27 +133,27 @@ erDiagram
 The platform employs a multi-stage Agentic RAG pipeline to ensure data accuracy and relevance:
 
 ### Stage 1: Pre-Retrieval Optimization
-*   **Intent Analysis:** The system analyzes user queries to determine the optimal strategy (e.g., General Search, Image Retrieval, or Database Querying).
-*   **Query Expansion:** Uses HyDE (Hypothetical Document Embeddings) and multi-query rewriting to improve search coverage.
+- **Intent Analysis** — determines optimal retrieval strategy (General Search, Image Retrieval, or Database Querying)
+- **Query Expansion** — uses HyDE (Hypothetical Document Embeddings) and multi-query rewriting to improve search coverage
 
 ### Stage 2: Hybrid Retrieval
-*   **Vector Search:** Performs mathematical similarity searches using pgvector (Cosine Similarity).
-*   **Full-Text Search (FTS):** Complements vector search by matching specific keywords using PostgreSQL's lexical search capabilities.
-*   **Dynamic SQL Generation:** For bug tracking requests, the AI generates and executes optimized SQL queries against the Mantis database.
+- **Vector Search** — mathematical similarity search using pgvector (Cosine Similarity)
+- **Full-Text Search (FTS)** — complements vector search with PostgreSQL lexical keyword matching
+- **Dynamic SQL Generation** — for bug tracking requests, AI generates and executes optimized SQL against Mantis DB
 
 ### Stage 3: Post-Retrieval Processing
-*   **Semantic Re-ranking:** Re-evaluates top-k results using a cross-encoder model to surface the most relevant information.
-*   **Contextual Synthesis:** Aggregates retrieved documents into a structured context for final answer generation, ensuring responses are grounded in verified data.
+- **Semantic Re-ranking** — re-evaluates top-k results using a cross-encoder model to surface the most relevant information
+- **Contextual Synthesis** — aggregates retrieved documents into a structured context for final answer generation, grounded in verified data
 
 ---
 
 ## Performance and Resource Management
 
-Designed to operate within constrained hardware environments (e.g., 16GB VRAM), the system implements several optimization techniques:
+Designed to operate within constrained hardware environments (e.g., 16 GB VRAM):
 
-*   **Dynamic Model Swapping:** Efficiently loads and unloads models (Embeddings, Re-rankers, and LLMs) from GPU memory to prevent Out-of-Memory (OOM) errors.
-*   **Response Streaming:** Utilizing Server-Sent Events (SSE), the system streams tokens and internal "Thought" steps to the user in real-time, reducing perceived latency.
-*   **Intelligent Caching:** Implements caching layers for embeddings and common queries to minimize redundant AI processing.
+- **Dynamic Model Swapping** — loads and unloads models (Embeddings, Re-rankers, LLMs) from GPU memory on demand to prevent OOM errors
+- **Response Streaming** — streams tokens and internal "Thought" steps to the client in real-time via Server-Sent Events (SSE)
+- **Intelligent Caching** — caches embeddings and common query results to minimize redundant AI processing
 
 ---
 
@@ -137,20 +161,25 @@ Designed to operate within constrained hardware environments (e.g., 16GB VRAM), 
 
 The project is fully containerized and ready for enterprise deployment:
 
-*   **Containerization:** Optimized Multi-stage Docker builds for minimal image size.
-*   **Orchestration:** Deployment-ready configurations for Kubernetes (K8s).
-*   **CI/CD Pipeline:** Fully automated GitLab CI/CD pipelines for building, testing, and deploying to staging and production environments.
+- **Containerization** — optimized multi-stage Docker builds for minimal image size
+- **Orchestration** — deployment-ready configurations for Kubernetes (K8s)
+- **CI/CD Pipeline** — fully automated GitLab CI/CD pipelines for building, testing, and deploying to staging and production environments
 
 ---
 
-## Diagram Generation
+## Prerequisites
 
-To regenerate the architecture diagram, you can use the following prompt with Mermaid.js or AI-based diagramming tools:
+| Requirement | Minimum |
+|---|---|
+| GPU VRAM | 16 GB (NVIDIA recommended) |
+| RAM | 32 GB |
+| Docker | 24+ |
+| Ollama | Latest |
+| PostgreSQL | 15+ with pgvector extension |
+| MySQL | 8.0+ (for Mantis integration) |
 
-> Please generate an Architecture and Dataflow Diagram for "WebClient AI Workspace". Include:
-> 1. Frontend: React/Vite/Zustand.
-> 2. Backend Gateway: Node.js/Express.
-> 3. Orchestrator: LangGraph/LangChain State Machine.
-> 4. AI Engine: Ollama (with Model Swapping logic).
-> 5. Databases: PostgreSQL (Vector) and MySQL (Relational).
-> 6. CI/CD: GitLab/Kubernetes.
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
