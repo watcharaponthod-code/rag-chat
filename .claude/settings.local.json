@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Sycapt/webclient-chat-internal/server/tests* -type f -name \"*.js\")",
+      "Bash(node server/tests_database/rag_full_diagnostic.js)",
+      "Bash(node server/tests_database/test_all_readme_functions.js)",
+      "Bash(node --experimental-vm-modules server/tests_database/evaluate_modes.js)",
+      "Bash(node server/tests_database/evaluate_modes.js)"
+    ]
+  }
+}

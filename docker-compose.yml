@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    container_name: webclient-ai-app
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      # Database Configuration
+      # IMPORTANT: Change these to match your actual database server
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_USER=${DB_USER:-admin}
+      - DB_PASSWORD=${DB_PASSWORD:-dummy_password}
+      - DB_NAME=${DB_NAME:-sycapt_chatai}
+      - DB_PORT=${DB_PORT:-30104}
+      - VECTOR_DB_NAME=${VECTOR_DB_NAME:-docsvt}
+
+      # External Services
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - NEXT_PUBLIC_N8N_WEBHOOK_URL=${NEXT_PUBLIC_N8N_WEBHOOK_URL}
+      - JWT_SECRET=${JWT_SECRET:-change_this_secret_in_production}
+    volumes:
+      # Persist uploaded files
+      - ./server/uploads:/app/server/uploads
+    # usage: docker-compose up -d

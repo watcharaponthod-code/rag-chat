@@ -1,0 +1,106 @@
+stages:
+  - build
+  - deploy-staging
+  - deploy-production
+
+variables:
+  # Docker image configuration
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_IMAGE_NAME: webclient-ai-internal
+  IMAGE_TAG: $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  IMAGE_LATEST: $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:latest
+
+# ----------------------------------------------------
+# 1. Build Docker Image
+# ----------------------------------------------------
+build:
+  stage: build
+  image: docker:27-dind
+  services:
+    - docker:27-dind
+  rules:
+    - if: "$CI_COMMIT_BRANCH"
+  before_script:
+    - echo $DOCKER_REGISTRY_PASSWORD | docker login -u $DOCKER_REGISTRY_USER --password-stdin $DOCKER_REGISTRY
+  script:
+    - docker build --pull --no-cache -t $IMAGE_TAG .
+    - docker tag $IMAGE_TAG $IMAGE_LATEST
+    - |
+      if [ ! -z "$CI_COMMIT_TAG" ]; then
+        docker tag $IMAGE_TAG $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$CI_COMMIT_TAG
+        docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME:$CI_COMMIT_TAG
+      fi
+    - docker push $IMAGE_TAG
+    - docker push $IMAGE_LATEST
+    - echo "Built and pushed image $IMAGE_TAG"
+
+# ----------------------------------------------------
+# 2. Deploy to Staging
+# ----------------------------------------------------
+deploy-staging:
+  stage: deploy-staging
+  image:
+    name: alpine/kubectl:latest
+    entrypoint: [""]
+  variables:
+    KUBE_NAMESPACE: ai-research
+  rules:
+    - if: "$CI_COMMIT_BRANCH"
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo "$DEV_KUBECONFIG" > $HOME/.kube/config
+    - chmod 600 $HOME/.kube/config
+  script:
+    - kubectl get ns ${KUBE_NAMESPACE} || kubectl create ns ${KUBE_NAMESPACE}
+    - |
+      kubectl create secret docker-registry docker-registry-secret \
+        --docker-server=${DOCKER_REGISTRY} \
+        --docker-username=${DOCKER_REGISTRY_USER} \
+        --docker-password=${DOCKER_REGISTRY_PASSWORD} \
+        --namespace=${KUBE_NAMESPACE} \
+        --dry-run=client -o yaml | kubectl apply -f -
+    - sed "s|REPLACE_IMAGE|${IMAGE_TAG}|g" k8s/base/deployment.yaml | kubectl apply -f - -n ${KUBE_NAMESPACE}
+    - kubectl rollout status deployment/webclient-ai-internal -n ${KUBE_NAMESPACE} --timeout=10m
+
+# ----------------------------------------------------
+# 3. Deploy to Production (Auto)
+# ----------------------------------------------------
+deploy-production:
+  stage: deploy-production
+  image:
+    name: alpine/kubectl:latest
+    entrypoint: [""]
+  variables:
+    KUBE_NAMESPACE: ai-research
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "init"'
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo "$DEV_KUBECONFIG" > $HOME/.kube/config
+    - chmod 600 $HOME/.kube/config
+  script:
+    - sed "s|REPLACE_IMAGE|${IMAGE_TAG}|g" k8s/base/deployment.yaml | kubectl apply -f - -n ${KUBE_NAMESPACE}
+    - kubectl rollout status deployment/webclient-ai-internal -n ${KUBE_NAMESPACE} --timeout=10m
+  environment:
+    name: production
+
+# ----------------------------------------------------
+# 4. Rollback Production
+# ----------------------------------------------------
+rollback-production:
+  stage: deploy-production
+  image:
+    name: alpine/kubectl:latest
+    entrypoint: [""]
+  variables:
+    KUBE_NAMESPACE: ai-research
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo "$DEV_KUBECONFIG" > $HOME/.kube/config
+    - chmod 600 $HOME/.kube/config
+  script:
+    - kubectl rollout undo deployment/webclient-ai-internal -n ${KUBE_NAMESPACE}

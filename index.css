@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Soft Red / Professional Palette */
+  --brand-50: #fff0f1;
+  --brand-100: #ffe0e3;
+  --brand-200: #ffc4c9;
+  /* Soft Pinkish Red */
+  --brand-300: #ffa1aa;
+  --brand-400: #ff7582;
+  /* Eye-friendly Red */
+  --brand-500: #f43f5e;
+  /* Base Rose (Kept for Identity but balanced) */
+  --brand-600: #e11d48;
+  --brand-700: #be123c;
+  --brand-800: #9f1239;
+  --brand-900: #881337;
+}
+
+/* Markdown Enhancements */
+.prose ul>li::marker {
+  color: var(--brand-400);
+}
+
+.prose ol>li::marker {
+  color: var(--brand-500);
+  font-weight: 600;
+}
+
+.prose th {
+  background-color: var(--brand-50);
+  color: var(--brand-800);
+}
+
+.dark .prose th {
+  background-color: rgba(225, 29, 72, 0.1);
+  color: var(--brand-200);
+}
+
+body {
+  @apply bg-white text-zinc-900 dark:bg-[#0a0a0a] dark:text-zinc-200 antialiased selection:bg-brand-500/30;
+}
+
+/* Slim Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-zinc-300 dark:bg-zinc-800 rounded-full transition-colors;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-zinc-400 dark:bg-zinc-700;
+}
+
+/* Background Patterns */
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.dark .bg-grid-pattern {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .bg-dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+}

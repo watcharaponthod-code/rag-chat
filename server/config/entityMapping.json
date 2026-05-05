@@ -1,0 +1,31 @@
+{
+  "clients": {
+    "ปิดไว้นะจ๊ะ": {
+      "variations": [
+        "ปิดไว้นะจ๊ะ",
+        "ปิดไว้นะจ๊ะ",
+        "Bangkok Bank",
+        "บางกอกแบงก์",
+        "ธนาคารกรุงเทพ"
+      ],
+      "dbColumn": "client_name",
+      "searchPattern": "('%ปิดไว้นะจ๊ะ%' OR '%Bangkok%Bank%' OR '%กรุงเทพ%')"
+    },
+    "scb": {
+      "variations": [
+        "SCB",
+        "scb",
+        "Siam Commercial",
+        "ไทยพาณิชย์",
+        "ธนาคารไทยพาณิชย์"
+      ],
+      "dbColumn": "client_name",
+      "searchPattern": "('%SCB%' OR '%Siam%Commercial%' OR '%ไทยพาณิชย์%')"
+    },
+    "kbank": {
+      "variations": ["KBANK", "kbank", "Kasikorn", "กสิกร", "ธนาคารกสิกรไทย"],
+      "dbColumn": "client_name",
+      "searchPattern": "('%KBANK%' OR '%Kasikorn%' OR '%กสิกร%')"
+    }
+  }
+}
