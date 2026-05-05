@@ -18,15 +18,18 @@ The system is built on a modular architecture that separates the frontend interf
     *   **LangGraph:** Orchestrates complex workflows through state machines, managing the "Thought Process" and agent behavior.
     *   **LlamaIndex:** Utilized for advanced document indexing and re-ranking.
 *   **Data Persistence:**
-    *   **PostgreSQL (with pgvector):** Handles semantic vector search and hybrid retrieval.
+    *   **PostgreSQL (with pgvector):** Handles semantic vector search and hybrid retrieval for documents and graph nodes.
     *   **MySQL:** Directly interfaces with the Mantis Bug Tracker system for real-time issue analysis.
 
 ---
 
 ## Database Schema (Entity-Relationship)
 
+The system utilizes a dual-layer database approach: a **Relational/Vector Layer** for chat and document management, and a **Unified Content Layer** for advanced RAG relationships.
+
 ```mermaid
 erDiagram
+    %% Chat and User Management
     USER ||--o{ CHAT_SESSION : "owns"
     USER {
         int id PK
@@ -54,11 +57,48 @@ erDiagram
         json citations
         datetime timestamp
     }
-    DOCUMENT {
+
+    %% Document and RAG Management
+    DOCUMENTS ||--o{ DOCUMENT_CHUNKS : "has"
+    DOCUMENTS ||--o{ DOCUMENT_IMAGES : "contains"
+    DOCUMENTS {
         int id PK
+        string document_name
+        string file_type
+        string project_name
+        string client_name
+    }
+    DOCUMENT_CHUNKS {
+        int id PK
+        int doc_id FK
         text content
-        json metadata
         vector embedding
+        tsvector fts
+    }
+    DOCUMENT_IMAGES {
+        int id PK
+        int doc_id FK
+        blob image_data
+        text description
+        vector embedding
+    }
+
+    %% Unified Content/Graph Layer
+    CONTENT_NODES ||--o{ CONTENT_RELATIONSHIPS : "source/target"
+    CONTENT_NODES ||--o| FILE_ATTRIBUTES : "details"
+    CONTENT_NODES ||--o| IMAGE_ATTRIBUTES : "details"
+    CONTENT_NODES {
+        int id PK
+        string node_type
+        text content_hash
+        vector embedding
+        tsvector fts
+    }
+    CONTENT_RELATIONSHIPS {
+        int id PK
+        int source_id FK
+        int target_id FK
+        string rel_type
     }
 ```
 
