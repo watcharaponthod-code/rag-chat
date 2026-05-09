@@ -27,6 +27,7 @@ export interface ThoughtStep {
 }
 
 export interface Citation {
+  hash?: string; // Algora Grounding Hash
   id: string;
   title: string;
   url: string;
@@ -42,6 +43,7 @@ export interface RelatedImage {
 }
 
 export interface Message {
+  isGrounded?: boolean; // Verified by Algora
   id: string;
   role: 'user' | 'assistant';
   content: string;
