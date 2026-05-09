@@ -56,7 +56,7 @@ export const ApiService = {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) {
-            const error = new Error(`Server Error: ${response.status} ${response.statusText}`);
+            throw new Error(`Server Error: ${response.status} ${response.statusText}`);
             (error as any).status = response.status;
             throw error;
         }
